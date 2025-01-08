@@ -32,7 +32,7 @@ At present, the hooking of dynamic libraries such as cuda driver, nvml, cuda run
 
 ## Clone
 ```
-git clone https://github.com/Bruce-Lee-LY/cuda_hook.git
+git clone https://github.com/chaunceyjiang/cuda_hook
 ```
 
 ## Build
