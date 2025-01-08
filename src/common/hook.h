@@ -13,17 +13,7 @@
 
 #include "macro_common.h"
 typedef void *(*fp_dlsym)(void *, const char *);
-// #define HOOK_GET_SYMBOL(type, real_dlsym, symbol_name)                                             \
-//     do {                                                                                           \
-//         static void *type##_handle = dlopen(s_##type##_dso, RTLD_NOW | RTLD_LOCAL);                \
-//         HOOK_CHECK(type##_handle);                                                                 \
-//         Dl_info info;                                                                              \
-//         void *symbol = real_dlsym(type##_handle, symbol_name.c_str());                             \
-//         HOOK_CHECK(symbol);                                                                        \
-//         HOOK_CHECK(dladdr(symbol, &info));                                                         \
-//         HLOG("Symbol: %s, Address: %p, Library: %s", symbol_name.c_str(), symbol, info.dli_fname); \
-//         return symbol;                                                                             \
-//     } while (0)
+/*
 #define HOOK_GET_SYMBOL(type, real_dlsym, symbol_name)                                             \
     do {                                                                                           \
         static void *type##_handle = dlopen(s_##type##_dso, RTLD_NOW | RTLD_LOCAL);                \
@@ -31,7 +21,18 @@ typedef void *(*fp_dlsym)(void *, const char *);
         Dl_info info;                                                                              \
         void *symbol = real_dlsym(type##_handle, symbol_name.c_str());                             \
         HOOK_CHECK(symbol);                                                                        \
+        HOOK_CHECK(dladdr(symbol, &info));                                                         \
+        HLOG("Symbol: %s, Address: %p, Library: %s", symbol_name.c_str(), symbol, info.dli_fname); \
         return symbol;                                                                             \
+    } while (0)
+*/
+#define HOOK_GET_SYMBOL(type, real_dlsym, symbol_name)                              \
+    do {                                                                            \
+        static void *type##_handle = dlopen(s_##type##_dso, RTLD_NOW | RTLD_LOCAL); \
+        HOOK_CHECK(type##_handle);                                                  \
+        void *symbol = real_dlsym(type##_handle, symbol_name.c_str());              \
+        HOOK_CHECK(symbol);                                                         \
+        return symbol;                                                              \
     } while (0)
 class Hook {
 public:
