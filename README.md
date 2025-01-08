@@ -26,9 +26,9 @@ At present, the hooking of dynamic libraries such as cuda driver, nvml, cuda run
 - OS: Linux
 - Cmake Version: >= 3.12
 - GCC Version: >= 4.8
-- CUDA Version: 11.4 (best)
-- CUDA Driver Version: 470.129.06 (best)
-- CUDNN Version: 7.6.5 (best)
+- CUDA Version: >= 11.4 
+- CUDA Driver Version: >= 470.129.06 
+- CUDNN Version: >= 7.6.5 
 
 ## Clone
 ```

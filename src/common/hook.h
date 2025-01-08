@@ -12,79 +12,94 @@
 #include <string>
 
 #include "macro_common.h"
-
-#define HOOK_GET_SYMBOL(type, symbol_name)                                          \
-    do {                                                                            \
-        static void *type##_handle = dlopen(s_##type##_dso, RTLD_NOW | RTLD_LOCAL); \
-        HOOK_CHECK(type##_handle);                                                  \
-        return dlsym(type##_handle, symbol_name.c_str());                           \
+typedef void *(*fp_dlsym)(void *, const char *);
+// #define HOOK_GET_SYMBOL(type, real_dlsym, symbol_name)                                             \
+//     do {                                                                                           \
+//         static void *type##_handle = dlopen(s_##type##_dso, RTLD_NOW | RTLD_LOCAL);                \
+//         HOOK_CHECK(type##_handle);                                                                 \
+//         Dl_info info;                                                                              \
+//         void *symbol = real_dlsym(type##_handle, symbol_name.c_str());                             \
+//         HOOK_CHECK(symbol);                                                                        \
+//         HOOK_CHECK(dladdr(symbol, &info));                                                         \
+//         HLOG("Symbol: %s, Address: %p, Library: %s", symbol_name.c_str(), symbol, info.dli_fname); \
+//         return symbol;                                                                             \
+//     } while (0)
+#define HOOK_GET_SYMBOL(type, real_dlsym, symbol_name)                                             \
+    do {                                                                                           \
+        static void *type##_handle = dlopen(s_##type##_dso, RTLD_NOW | RTLD_LOCAL);                \
+        HOOK_CHECK(type##_handle);                                                                 \
+        Dl_info info;                                                                              \
+        void *symbol = real_dlsym(type##_handle, symbol_name.c_str());                             \
+        HOOK_CHECK(symbol);                                                                        \
+        return symbol;                                                                             \
     } while (0)
-
 class Hook {
 public:
-    Hook() = default;
-    ~Hook() = default;
-
-    static void *GetCUDASymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(cuda, symbol_name);
+    static Hook &getInstance() {
+        static Hook instance;
+        return instance;
     }
 
-    static void *GetNVMLSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(nvml, symbol_name);
+    void *GetCUDASymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(cuda, real_dlsym, symbol_name);
     }
 
-    static void *GetCUDARTSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(cudart, symbol_name);
+    void *GetNVMLSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(nvml, real_dlsym, symbol_name);
     }
 
-    static void *GetCUDNNSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(cudnn, symbol_name);
+    void *GetCUDARTSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(cudart, real_dlsym, symbol_name);
     }
 
-    static void *GetCUBLASSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(cublas, symbol_name);
+    void *GetCUDNNSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(cudnn, real_dlsym, symbol_name);
     }
 
-    static void *GetCUBLASLTSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(cublasLt, symbol_name);
+    void *GetCUBLASSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(cublas, real_dlsym, symbol_name);
     }
 
-    static void *GetCUFFTSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(cufft, symbol_name);
+    void *GetCUBLASLTSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(cublasLt, real_dlsym, symbol_name);
     }
 
-    static void *GetNVTXSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(nvtx, symbol_name);
+    void *GetCUFFTSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(cufft, real_dlsym, symbol_name);
     }
 
-    static void *GetNVRTCSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(nvrtc, symbol_name);
+    void *GetNVTXSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(nvtx, real_dlsym, symbol_name);
     }
 
-    static void *GetCURANDSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(curand, symbol_name);
+    void *GetNVRTCSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(nvrtc, real_dlsym, symbol_name);
     }
 
-    static void *GetCUSPARSESymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(cusparse, symbol_name);
+    void *GetCURANDSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(curand, real_dlsym, symbol_name);
     }
 
-    static void *GetCUSOLVERSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(cusolver, symbol_name);
+    void *GetCUSPARSESymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(cusparse, real_dlsym, symbol_name);
     }
 
-    static void *GetNVJPEGSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(nvjpeg, symbol_name);
+    void *GetCUSOLVERSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(cusolver, real_dlsym, symbol_name);
     }
 
-    static void *GetNVBLASSymbol(const std::string &symbol_name) {
-        HOOK_GET_SYMBOL(nvblas, symbol_name);
+    void *GetNVJPEGSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(nvjpeg, real_dlsym, symbol_name);
+    }
+
+    void *GetNVBLASSymbol(const std::string &symbol_name) {
+        HOOK_GET_SYMBOL(nvblas, real_dlsym, symbol_name);
     }
 
 private:
     // nvidia native cuda dynamic library can be modified to any other unambiguous name, or moved to any path
-    static constexpr const char *s_cuda_dso = "/usr/lib/x86_64-linux-gnu/libcuda.so";
-    static constexpr const char *s_nvml_dso = "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so";
+    static constexpr const char *s_cuda_dso = "/usr/lib/x86_64-linux-gnu/libcuda.so.1";
+    static constexpr const char *s_nvml_dso = "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1";
     static constexpr const char *s_cudart_dso = "/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so";
     static constexpr const char *s_cudnn_dso = "/usr/local/cudnn/lib64/libcudnn.so";
     static constexpr const char *s_cublas_dso = "/usr/local/cuda/targets/x86_64-linux/lib/libcublas.so";
@@ -98,22 +113,41 @@ private:
     static constexpr const char *s_nvjpeg_dso = "/usr/local/cuda/targets/x86_64-linux/lib/libnvjpeg.so";
     static constexpr const char *s_nvblas_dso = "/usr/local/cuda/targets/x86_64-linux/lib/libnvblas.so";
 
+private:
+    Hook() {
+        if (real_dlsym == NULL) {
+            void *handle = dlopen("libc.so.6", RTLD_LAZY);
+            if (!handle) {
+                HLOG("Failed to open libc.so.6: %s", dlerror());
+                HOOK_CHECK(handle);
+            }
+            real_dlsym = (fp_dlsym)dlvsym(handle, "dlsym", "GLIBC_2.2.5");
+            if (real_dlsym == NULL) {
+                HLOG("Failed to find real dlsym function: %s", dlerror());
+                HOOK_CHECK(real_dlsym);
+            }
+        }
+    }
+    ~Hook() {
+        real_dlsym = NULL;
+    }
+    fp_dlsym real_dlsym = NULL;
     HOOK_DISALLOW_COPY_AND_ASSIGN(Hook);
 };
 
-#define HOOK_CUDA_SYMBOL(symbol_name) Hook::GetCUDASymbol(symbol_name)
-#define HOOK_NVML_SYMBOL(symbol_name) Hook::GetNVMLSymbol(symbol_name)
-#define HOOK_CUDART_SYMBOL(symbol_name) Hook::GetCUDARTSymbol(symbol_name)
-#define HOOK_CUDNN_SYMBOL(symbol_name) Hook::GetCUDNNSymbol(symbol_name)
-#define HOOK_CUBLAS_SYMBOL(symbol_name) Hook::GetCUBLASSymbol(symbol_name)
-#define HOOK_CUBLASLT_SYMBOL(symbol_name) Hook::GetCUBLASLTSymbol(symbol_name)
-#define HOOK_CUFFT_SYMBOL(symbol_name) Hook::GetCUFFTSymbol(symbol_name)
-#define HOOK_NVTX_SYMBOL(symbol_name) Hook::GetNVTXSymbol(symbol_name)
-#define HOOK_NVRTC_SYMBOL(symbol_name) Hook::GetNVRTCSymbol(symbol_name)
-#define HOOK_CURAND_SYMBOL(symbol_name) Hook::GetCURANDSymbol(symbol_name)
-#define HOOK_CUSPARSE_SYMBOL(symbol_name) Hook::GetCUSPARSESymbol(symbol_name)
-#define HOOK_CUSOLVER_SYMBOL(symbol_name) Hook::GetCUSOLVERSymbol(symbol_name)
-#define HOOK_NVJPEG_SYMBOL(symbol_name) Hook::GetNVJPEGSymbol(symbol_name)
-#define HOOK_NVBLAS_SYMBOL(symbol_name) Hook::GetNVBLASSymbol(symbol_name)
+#define HOOK_CUDA_SYMBOL(symbol_name) Hook::getInstance().GetCUDASymbol(symbol_name)
+#define HOOK_NVML_SYMBOL(symbol_name) Hook::getInstance().GetNVMLSymbol(symbol_name)
+#define HOOK_CUDART_SYMBOL(symbol_name) Hook::getInstance().GetCUDARTSymbol(symbol_name)
+#define HOOK_CUDNN_SYMBOL(symbol_name) Hook::getInstance().GetCUDNNSymbol(symbol_name)
+#define HOOK_CUBLAS_SYMBOL(symbol_name) Hook::getInstance().GetCUBLASSymbol(symbol_name)
+#define HOOK_CUBLASLT_SYMBOL(symbol_name) Hook::getInstance().GetCUBLASLTSymbol(symbol_name)
+#define HOOK_CUFFT_SYMBOL(symbol_name) Hook::getInstance().GetCUFFTSymbol(symbol_name)
+#define HOOK_NVTX_SYMBOL(symbol_name) Hook::getInstance().GetNVTXSymbol(symbol_name)
+#define HOOK_NVRTC_SYMBOL(symbol_name) Hook::getInstance().GetNVRTCSymbol(symbol_name)
+#define HOOK_CURAND_SYMBOL(symbol_name) Hook::getInstance().GetCURANDSymbol(symbol_name)
+#define HOOK_CUSPARSE_SYMBOL(symbol_name) Hook::getInstance().GetCUSPARSESymbol(symbol_name)
+#define HOOK_CUSOLVER_SYMBOL(symbol_name) Hook::getInstance().GetCUSOLVERSymbol(symbol_name)
+#define HOOK_NVJPEG_SYMBOL(symbol_name) Hook::getInstance().GetNVJPEGSymbol(symbol_name)
+#define HOOK_NVBLAS_SYMBOL(symbol_name) Hook::getInstance().GetNVBLASSymbol(symbol_name)
 
 #endif  // __CUDA_HOOK_HOOK_H__

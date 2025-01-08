@@ -2278,3 +2278,19 @@ HOOK_C_API HOOK_DECL_EXPORT nvmlReturn_t nvmlDeviceGetGpuInstancePossiblePlaceme
     HOOK_CHECK(func_entry);
     return func_entry(device, profileId, placements, count);
 }
+
+HOOK_C_API HOOK_DECL_EXPORT nvmlReturn_t nvmlInternalGetExportTable(const void **ppExportTable, void *pExportTableId) {
+    HOOK_TRACE_PROFILE("nvmlInternalGetExportTable");
+    using func_ptr = nvmlReturn_t (*)(const void **, void *);
+    static auto func_entry = reinterpret_cast<func_ptr>(HOOK_NVML_SYMBOL("nvmlInternalGetExportTable"));
+    HOOK_CHECK(func_entry);
+    return func_entry(ppExportTable, pExportTableId);
+}
+
+HOOK_C_API HOOK_DECL_EXPORT  nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t *memory) {
+    HOOK_TRACE_PROFILE("nvmlDeviceGetMemoryInfo_v2");
+    using func_ptr = nvmlReturn_t (*)(nvmlDevice_t, nvmlMemory_v2_t *);
+    static auto func_entry = reinterpret_cast<func_ptr>(HOOK_NVML_SYMBOL("nvmlDeviceGetMemoryInfo_v2"));
+    HOOK_CHECK(func_entry);
+    return func_entry(device, memory);
+}
