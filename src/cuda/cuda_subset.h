@@ -1854,6 +1854,21 @@ typedef enum CUaccessProperty_enum {
     CU_ACCESS_PROPERTY_PERSISTING = 2 /**< Persisting access is more likely to persist in cache.*/
 } CUaccessProperty;
 
+typedef enum CUdriverProcAddress_flags_enum {
+    CU_GET_PROC_ADDRESS_DEFAULT = 0,                       /**< Default search mode for driver symbols. */
+    CU_GET_PROC_ADDRESS_LEGACY_STREAM = 1 << 0,            /**< Search for legacy versions of driver symbols. */
+    CU_GET_PROC_ADDRESS_PER_THREAD_DEFAULT_STREAM = 1 << 1 /**< Search for per-thread versions of driver symbols. */
+} CUdriverProcAddress_flags;
+
+/**
+ * Flags to indicate search status. For more details see ::cuGetProcAddress
+ */
+typedef enum CUdriverProcAddressQueryResult_enum {
+    CU_GET_PROC_ADDRESS_SUCCESS = 0,               /**< Symbol was succesfully found */
+    CU_GET_PROC_ADDRESS_SYMBOL_NOT_FOUND = 1,      /**< Symbol was not found in search */
+    CU_GET_PROC_ADDRESS_VERSION_NOT_SUFFICIENT = 2 /**< Symbol was found but version supplied was not sufficient */
+} CUdriverProcAddressQueryResult;
+
 /**
  * Specifies an access policy for a window, a contiguous extent of memory
  * beginning at base_ptr and ending at base_ptr + num_bytes.

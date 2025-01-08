@@ -3566,3 +3566,22 @@ HOOK_C_API HOOK_DECL_EXPORT CUresult cuGetProcAddress_ptsz(const char *symbol, v
     HOOK_CHECK(func_entry);
     return func_entry(symbol, funcPtr, driverVersion, flags);
 }
+
+HOOK_C_API HOOK_DECL_EXPORT CUresult cuGetProcAddress(const char *symbol, void **pfn, int cudaVersion,
+                                                      cuuint64_t flags) {
+    HOOK_TRACE_PROFILE("cuGetProcAddress");
+    using func_ptr = CUresult (*)(const char *, void **, int, cuuint64_t);
+    static auto func_entry = reinterpret_cast<func_ptr>(HOOK_CUDA_SYMBOL("cuGetProcAddress"));
+    HOOK_CHECK(func_entry);
+    return func_entry(symbol, pfn, cudaVersion, flags);
+}
+
+HOOK_C_API HOOK_DECL_EXPORT CUresult cuGetProcAddress_v2(const char *symbol, void **pfn, int cudaVersion,
+                                                        cuuint64_t flags,
+                                                        CUdriverProcAddressQueryResult *symbolStatus) {
+    HOOK_TRACE_PROFILE("cuGetProcAddress_v2");
+    using func_ptr = CUresult (*)(const char *, void **, int, cuuint64_t, CUdriverProcAddressQueryResult *);
+    static auto func_entry = reinterpret_cast<func_ptr>(HOOK_CUDA_SYMBOL("cuGetProcAddress_v2"));
+    HOOK_CHECK(func_entry);
+    return func_entry(symbol, pfn, cudaVersion, flags, symbolStatus);
+}
