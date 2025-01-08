@@ -13,6 +13,17 @@
 
 #include "macro_common.h"
 typedef void *(*fp_dlsym)(void *, const char *);
+// #define HOOK_GET_SYMBOL(type, real_dlsym, symbol_name)                                             \
+//     do {                                                                                           \
+//         static void *type##_handle = dlopen(s_##type##_dso, RTLD_NOW | RTLD_LOCAL);                \
+//         HOOK_CHECK(type##_handle);                                                                 \
+//         Dl_info info;                                                                              \
+//         void *symbol = real_dlsym(type##_handle, symbol_name.c_str());                             \
+//         HOOK_CHECK(symbol);                                                                        \
+//         HOOK_CHECK(dladdr(symbol, &info));                                                         \
+//         HLOG("Symbol: %s, Address: %p, Library: %s", symbol_name.c_str(), symbol, info.dli_fname); \
+//         return symbol;                                                                             \
+//     } while (0)
 #define HOOK_GET_SYMBOL(type, real_dlsym, symbol_name)                                             \
     do {                                                                                           \
         static void *type##_handle = dlopen(s_##type##_dso, RTLD_NOW | RTLD_LOCAL);                \
@@ -20,14 +31,10 @@ typedef void *(*fp_dlsym)(void *, const char *);
         Dl_info info;                                                                              \
         void *symbol = real_dlsym(type##_handle, symbol_name.c_str());                             \
         HOOK_CHECK(symbol);                                                                        \
-        HOOK_CHECK(dladdr(symbol, &info));                                                         \
-        HLOG("Symbol: %s, Address: %p, Library: %s", symbol_name.c_str(), symbol, info.dli_fname); \
         return symbol;                                                                             \
     } while (0)
-
 class Hook {
 public:
-    // 获取唯一实例的静态方法
     static Hook &getInstance() {
         static Hook instance;
         return instance;
@@ -91,8 +98,8 @@ public:
 
 private:
     // nvidia native cuda dynamic library can be modified to any other unambiguous name, or moved to any path
-    static constexpr const char *s_cuda_dso = "/usr/lib/x86_64-linux-gnu/libcuda.so";
-    static constexpr const char *s_nvml_dso = "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so";
+    static constexpr const char *s_cuda_dso = "/usr/lib/x86_64-linux-gnu/libcuda.so.1";
+    static constexpr const char *s_nvml_dso = "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1";
     static constexpr const char *s_cudart_dso = "/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so";
     static constexpr const char *s_cudnn_dso = "/usr/local/cudnn/lib64/libcudnn.so";
     static constexpr const char *s_cublas_dso = "/usr/local/cuda/targets/x86_64-linux/lib/libcublas.so";
@@ -107,7 +114,6 @@ private:
     static constexpr const char *s_nvblas_dso = "/usr/local/cuda/targets/x86_64-linux/lib/libnvblas.so";
 
 private:
-    // 私有构造函数，防止外部实例化
     Hook() {
         if (real_dlsym == NULL) {
             void *handle = dlopen("libc.so.6", RTLD_LAZY);
